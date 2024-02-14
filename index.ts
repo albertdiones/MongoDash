@@ -1,4 +1,4 @@
-const {Logger} = require('add_logger');
+    const {Logger} = require('add_logger');
 
 const mongoose = require('mongoose');
 require('dotenv').config();
@@ -16,31 +16,49 @@ logger.debug("Connecting to db:", uri);
 await mongoose.connect(uri);
 logger.debug("Connected to db:", uri);
 
-async function getIndexCounts() {
+const db = mongoose.connection.db;
 
-  try {
-    const db = mongoose.connection.db;
-    const collections = await db.listCollections().toArray();
+const collections = await db.listCollections().toArray();
+interface collectionCountResult {name: string, count: number};
+async function getIndexCounts(): Promise<collectionCountResult[]>  {
+    const results: Array<Promise<collectionCountResult>>   = [];
+
+    try {
 
     for (const collection of collections) {
-      const collectionName = collection.name;
-      logger.log(`${collectionName}: ${await db.collection(collectionName).countDocuments({})}`);
+        results.push(getCollectionCount(collection.name));
     }
-  } catch (err) {
+    } catch (err) {
     logger.error("Error:", err);
-  }
+    }
+    return Promise.all(results);
+}
+
+function getCollectionCount(collectionName: string): Promise<collectionCountResult> {
+    return db.collection(collectionName).countDocuments({}).then(
+        (count: number) =>( {name: collectionName,count})
+    )
 }
 function clearConsole() {
     // Print enough newline characters to scroll the current content out of view
     process.stdout.write('\x1B[2J\x1B[H');
 }
 
+function showCollectionCounts(counts: Array<collectionCountResult>) {
+    counts.forEach(
+        (count: collectionCountResult) => {
+            logger.log(`${count.name}: ${count.count}`);
+        }
+    );
+}
+
 
 // Invoke the function
 
-function continuousIndexCounts() {
+async function continuousIndexCounts() {
+    const collectionCounts = await getIndexCounts();
     clearConsole();
-    getIndexCounts();
+    showCollectionCounts(collectionCounts)
     Bun.sleep(1000).then(continuousIndexCounts)
 }
 
