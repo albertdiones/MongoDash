@@ -1,28 +1,31 @@
+const {Logger} = require('add_logger');
+
 const mongoose = require('mongoose');
 require('dotenv').config();
+
+
+const logger  = new Logger('default');
 
 async function getIndexCounts() {
   const uri = process.env.MONGODB_URI;
   if (!uri) {
-    console.error("MongoDB URI not provided in the .env file.");
+    logger.error("MongoDB URI not provided in the .env file.");
     return;
   }
 
   try {
+    logger.debug("Connecting to db:", uri);
     await mongoose.connect(uri);
-    console.log("Connected to MongoDB");
-
+    logger.debug("Connected to db:", uri);
     const db = mongoose.connection.db;
     const collections = await db.listCollections().toArray();
 
     for (const collection of collections) {
       const collectionName = collection.name;
-      console.log(`\t${collectionName}: ${await db.collection(collectionName).countDocuments({})}`);
+      logger.log(`${collectionName}: ${await db.collection(collectionName).countDocuments({})}`);
     }
   } catch (err) {
-    console.error("Error:", err);
-  } finally {
-    await mongoose.disconnect();
+    logger.error("Error:", err);
   }
 }
 
