@@ -6,17 +6,19 @@ require('dotenv').config();
 
 const logger  = new Logger('default');
 
+const uri = process.env.MONGODB_URI;
+if (!uri) {
+    const error = "MongoDB URI not provided in the .env file.";
+    logger.error(error);
+    throw error;
+}
+logger.debug("Connecting to db:", uri);
+await mongoose.connect(uri);
+logger.debug("Connected to db:", uri);
+
 async function getIndexCounts() {
-  const uri = process.env.MONGODB_URI;
-  if (!uri) {
-    logger.error("MongoDB URI not provided in the .env file.");
-    return;
-  }
 
   try {
-    logger.debug("Connecting to db:", uri);
-    await mongoose.connect(uri);
-    logger.debug("Connected to db:", uri);
     const db = mongoose.connection.db;
     const collections = await db.listCollections().toArray();
 
@@ -28,8 +30,18 @@ async function getIndexCounts() {
     logger.error("Error:", err);
   }
 }
+function clearConsole() {
+    // Print enough newline characters to scroll the current content out of view
+    process.stdout.write('\x1B[2J\x1B[H');
+}
 
-module.exports = getIndexCounts;
 
 // Invoke the function
-getIndexCounts();
+
+function continuousIndexCounts() {
+    clearConsole();
+    getIndexCounts();
+    Bun.sleep(1000).then(continuousIndexCounts)
+}
+
+continuousIndexCounts();
