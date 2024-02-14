@@ -1,0 +1,17 @@
+{
+  "name": "mongodash",
+  "version": "0.0.0",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "add_logger": "^0.0.5",
+    "dotenv": "^16.4.4",
+    "mongoose": "^8.1.2"
+  }
+}
