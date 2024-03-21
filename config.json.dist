@@ -1,0 +1,9 @@
+{
+    "extra_queries": [
+        {
+            "name": "unsent_notifications", 
+            "collection": "notifications",
+            "filter": { "email_sent": false }
+        }
+    ]
+}

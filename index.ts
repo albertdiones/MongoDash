@@ -18,6 +18,13 @@ logger.debug("Connected to db:", uri);
 
 const db = mongoose.connection.db;
 
+
+const fs = require('fs');
+
+// Load the config file
+const configPath = './config.json';
+const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+
 const collections = await db.listCollections().toArray();
 interface collectionCountResult {name: string, count: number};
 async function getIndexCounts(): Promise<collectionCountResult[]>  {
@@ -53,13 +60,29 @@ function showCollectionCounts(counts: Array<collectionCountResult>) {
 }
 
 
-// Invoke the function
+async function getExtraQueryCounts() {
+  try {
+    const counts = [];
+
+    for (const query of config.extra_queries) {
+      const collection = db.collection(query.collection);
+      const count = await collection.countDocuments(query.filter);
+      counts.push({ name: query.name, count });
+    }
+    showCollectionCounts(counts);
+  } catch (err) {
+    console.error("Error:", err);
+  }
+}
 
 async function continuousIndexCounts() {
     const collectionCounts = await getIndexCounts();
     clearConsole();
-    showCollectionCounts(collectionCounts)
+    showCollectionCounts(collectionCounts);
+    await getExtraQueryCounts();
     Bun.sleep(1000).then(continuousIndexCounts)
 }
+
+
 
 continuousIndexCounts();
