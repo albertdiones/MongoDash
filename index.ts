@@ -6,7 +6,7 @@ require('dotenv').config();
 
 const logger  = new Logger('default');
 
-const uri = process.env.MONGODB_URI;
+const uri = process.env.MONGO_URL;
 if (!uri) {
     const error = "MongoDB URI not provided in the .env file.";
     logger.error(error);
