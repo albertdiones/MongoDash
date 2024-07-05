@@ -1,0 +1,3 @@
+import { continuousIndexCounts } from ".";
+
+continuousIndexCounts()

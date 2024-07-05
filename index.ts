@@ -82,7 +82,3 @@ export async function continuousIndexCounts() {
     await getExtraQueryCounts();
     Bun.sleep(1000).then(continuousIndexCounts)
 }
-
-
-
-continuousIndexCounts();
