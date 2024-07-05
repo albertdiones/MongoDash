@@ -1,4 +1,4 @@
-    const {Logger} = require('add_logger');
+const {Logger} = require('add_logger');
 
 const mongoose = require('mongoose');
 require('dotenv').config();
@@ -65,9 +65,16 @@ async function getExtraQueryCounts() {
     const counts = [];
 
     for (const query of config.extra_queries) {
-      const collection = db.collection(query.collection);
-      const count = await collection.countDocuments(query.filter);
-      counts.push({ name: query.name, count });
+        if (query.type === 'aggregate') {
+            const collection = db.collection(query.collection);
+            const result = await collection.aggregate(query.argument).toArray();
+            counts.push({ name: query.name, count: result[0]?.value ?? null });
+        }
+        else {
+            const collection = db.collection(query.collection);
+            const count = await collection.countDocuments(query.filter);
+            counts.push({ name: query.name, count });
+        }
     }
     showCollectionCounts(counts);
   } catch (err) {
