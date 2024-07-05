@@ -75,7 +75,7 @@ async function getExtraQueryCounts() {
   }
 }
 
-async function continuousIndexCounts() {
+export async function continuousIndexCounts() {
     const collectionCounts = await getIndexCounts();
     clearConsole();
     showCollectionCounts(collectionCounts);
