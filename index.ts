@@ -82,10 +82,10 @@ async function getExtraQueryCounts() {
   }
 }
 
-export async function continuousIndexCounts() {
+export async function continuousIndexCounts(refresh:number = 1000) {
     const collectionCounts = await getIndexCounts();
     clearConsole();
     showCollectionCounts(collectionCounts);
     await getExtraQueryCounts();
-    Bun.sleep(1000).then(continuousIndexCounts)
+    Bun.sleep(refresh).then(() => continuousIndexCounts(refresh))
 }
